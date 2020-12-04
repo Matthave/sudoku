@@ -1,23 +1,22 @@
-import logo from './logo.svg';
-import './App.css';
+import React, {useState} from 'react';
+import StartScreen from "./components/StartScreen";
+import GameField from "./components/GameField";
 
 function App() {
+  const [startGame, setStartGame ] = useState(false);
+
+  const letStartFunc = () => {
+    const startScreen = document.querySelector(".startScreen");
+    startScreen.classList.add("startScreenOff");
+
+    setTimeout(() => {
+      setStartGame(true);
+    }, 500);
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <StartScreen letStartFunc={letStartFunc}/>
+      {startGame ? <GameField/> : null}
     </div>
   );
 }
