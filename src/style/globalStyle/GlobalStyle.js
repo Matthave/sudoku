@@ -6,7 +6,7 @@ const GlobalStyle = createGlobalStyle`
     margin:0;
     padding:0;
     font-family: "Source Sans Pro", sans-serif;
-    box-sizing:border-box;
+    box-sizing:border-box !important;
     border:none;
     outline: transparent;
   }
@@ -33,6 +33,26 @@ input::-webkit-inner-spin-button {
 /* Firefox */
 input[type=number] {
   -moz-appearance: textfield;
+}
+
+.gameItem{
+  border:none;
+}
+
+.wrong{
+  background-color: #f00 !important;
+}
+
+.crashElement{
+  background-color:#fdd !important;
+}
+
+.col1,.col2,.col4,.col5,.col7,.col8{
+  border-right:1px solid #ccc;
+}
+
+.row1,.row2,.row4,.row5,.row7,.row8{
+  border-bottom:1px solid #ccc;
 }
 `;
 
