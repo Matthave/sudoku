@@ -178,7 +178,7 @@ const GameField = () => {
                 }
             }
          }
-         hideSomeFileds()
+         hideSomeFileds();
     }
 
 
