@@ -7,50 +7,59 @@ position: fixed;
 top:50%;
 left:50%;
 transform:translate(-50%,-50%);
-/* opacity: ${(props) => (props.visibility ? 1 : 0)}; */
-transition: 1s linear;
+opacity: ${(props) => (props.visibility ? 1 : 0)};
+transition: opacity 1s linear;
+width:300px;
+min-width:300px;
+
+@media ${device.xsmall} {
+    width:360px;
+  }
+
+@media ${device.small} {
+    width:555px;
+}
 `;
 
 const GameSquar = styled.div`
-width:75px;
-height:75px;
-/* background-color: ${(props) => (props.bgColor ? "#E2F7FF" : "#fff")}; */
-border:1px solid black;
+width:100px;
+height:100px;
 
-@media ${device.small} {
-    width:125px;
-    height:125px;
+@media ${device.xsmall} {
+    width:120px;
+    height:120px;
   }
 
-  @media ${device.medium} {
-    width:175px;
-    height:175px;
-  }
+  @media ${device.small} {
+    width:180px;
+    height:180px;
+  } 
 `;
 
 const GameItem = styled.input`
-width:33%;
-transition:0.1s linear;
+width:32px;
+height:32px;
 cursor: pointer;
 caret-color:transparent;
 font-weight:100;
+color:#344861;
+margin:0;
 
 &:hover{
-    background-color:royalblue !important;
-    color:#fff;
+    background-color:#BBDEFB !important;
 }
-@media ${device.small} {
-    height:40.6px;
-    line-height:40.6px;
+@media ${device.xsmall} {
+    height:38.5px;
+    width:38.5px;
     font-size:22.5px;
   }
 
-  @media ${device.medium} {
-    height:57.1px;
-    line-height:57.1px;
+  @media ${device.small} {
+    width:58.5px;
+    height:58.5px;
+    line-height:60px;
     font-size:40px;
-    border:1px solid #ccc;
-  }
+  } 
 `;
 
 const Loading = styled.p`
@@ -59,9 +68,10 @@ const Loading = styled.p`
     top:50%;
     left:50%;
     transform:translate(-50%,-50%);
+    z-index:1;
 `;
 
-const GameField = () => {
+const GameField = ({chooseLevel}) => {
     const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
@@ -71,12 +81,14 @@ const GameField = () => {
     const initialFunction = () =>{
         const gameItem = document.querySelectorAll(".gameItem");
         gameItem.forEach((ele)=>{
-            ele.addEventListener("click", (e)=> hoverEffectOn(e));
+            ele.addEventListener("click", (e)=> markEffectOn(e));
             ele.addEventListener("keyup", (e)=> keyUpHandler(e));
         })
 
         //Function for generate complete Sudoku board
-        setAllNumbers();
+        if(!isReady){
+            setAllNumbers();
+        }
     }
     
     const keyUpHandler = (e) => {
@@ -84,7 +96,7 @@ const GameField = () => {
             e.target.value = e.target.value[1];
         }
 
-        if(e.target.value == "0"){
+        if(e.target.value === "0" || e.target.value === 0){
             e.target.value = "";
         }
 
@@ -115,29 +127,35 @@ const GameField = () => {
 
     }
 
-    const hoverEffectOn = (e) => {
+    const markEffectOn = (e) => {
         const gameItems = document.querySelectorAll(".gameItem");
         gameItems.forEach((item)=>{
         item.style.backgroundColor = "initial";
-        item.style.color = "#000";
+        item.style.color = "#344861";
         });
 
         if(e.target.classList[5]){
             const everyCurrentCol = document.querySelectorAll(`.${e.target.classList[5]}`);
             everyCurrentCol.forEach((col)=>{
-                col.style.backgroundColor = "#eee"
+                col.style.backgroundColor = "#E2E7ED"
             })
          }
 
         if(e.target.classList[6]){
            const everyCurrentRow = document.querySelectorAll(`.${e.target.classList[6]}`);
            everyCurrentRow.forEach((row)=>{
-               row.style.backgroundColor = "#eee"
+               row.style.backgroundColor = "#E2E7ED"
            })
         }
 
-        e.target.style.backgroundColor = "royalblue"
-        e.target.style.color = "#fff"
+        if(e.target.classList[7]){
+            const everyCurrentSquar = document.querySelectorAll(`.${e.target.classList[7]}`);
+            everyCurrentSquar.forEach((row)=>{
+                row.style.backgroundColor = "#E2E7ED"
+            })
+        }
+
+        e.target.style.backgroundColor = "#BBDEFB"
     }
 
 
@@ -179,24 +197,31 @@ const GameField = () => {
             }
          }
          hideSomeFileds();
+         setIsReady(true);
     }
 
 
     const hideSomeFileds = () => {
-        const gameItem = document.querySelectorAll(".gameItem");
+        for(let i = 1; i <= 9; i++){
+            const gameRowItem = [...document.querySelectorAll(`.row${i}`)];
+            const allowIndex = [1,2,3,4,5,6,7,8,9];
 
-        for(let i=0; i < 40; i++){
-            const index = Math.floor(Math.random() * (gameItem.length - 0) + 0);
-            gameItem[index].value = "";
+            for(let j = 0; j < parseInt(chooseLevel); j++){
+                const index = Math.floor(Math.random() * (allowIndex.length - 0) + 0);
+                const filtredRowElements = gameRowItem.findIndex(ele => ele.value === allowIndex[index].toString());
+                allowIndex.splice(index,1);
 
+                if(filtredRowElements !== -1) gameRowItem[filtredRowElements].value = "";
+            }
         }
     }
 
     return (
         <>
-        <Game className="container col-12 d-flex flex-column justify-content-center gameField">
-        <div className="container d-flex justify-content-center">
-            <GameSquar className="container d-flex flex-wrap align-items-center px-0 mx-0 squar1" bgColor>
+        {isReady ? null : <Loading>LOADING...</Loading> }
+        <Game className="container col-12 d-flex flex-column justify-content-center px-0 py-0 gameField" visibility={isReady ? "true" : ""}>
+        <div className="container d-flex justify-content-center w-100 px-0 py-0">
+            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar1" bgColor>
                     <GameItem className="px-0 text-center gameItem col1 row1 sq1" type="number"/>
                     <GameItem className="px-0 text-center gameItem col2 row1 sq1" type="number"/>
                     <GameItem className="px-0 text-center gameItem col3 row1 sq1" type="number"/>
@@ -208,7 +233,7 @@ const GameField = () => {
                     <GameItem className="px-0 text-center gameItem col3 row3 sq1" type="number"/>
             </GameSquar>
 
-            <GameSquar className="container d-flex flex-wrap align-items-center px-0 mx-0 squar2">
+            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar2">
                     <GameItem className="px-0 text-center gameItem col4 row1 sq2" type="number"/>
                     <GameItem className="px-0 text-center gameItem col5 row1 sq2" type="number"/>
                     <GameItem className="px-0 text-center gameItem col6 row1 sq2" type="number"/>
@@ -220,7 +245,7 @@ const GameField = () => {
                     <GameItem className="px-0 text-center gameItem col6 row3 sq2" type="number"/>
             </GameSquar>
 
-            <GameSquar className="container d-flex flex-wrap align-items-center px-0 mx-0 squar3" bgColor>
+            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar3" bgColor>
                     <GameItem className="px-0 text-center gameItem col7 row1 sq3" type="number"/>
                     <GameItem className="px-0 text-center gameItem col8 row1 sq3" type="number"/>
                     <GameItem className="px-0 text-center gameItem col9 row1 sq3" type="number"/>
@@ -233,8 +258,8 @@ const GameField = () => {
             </GameSquar>
         </div>
 
-        <div className="container d-flex justify-content-center">
-            <GameSquar className="container d-flex flex-wrap align-items-center px-0 mx-0 squar4">
+        <div className="container d-flex justify-content-center w-100 px-0 py-0">
+            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar4">
                     <GameItem className="px-0 text-center gameItem col1 row4 sq4" type="number"/>
                     <GameItem className="px-0 text-center gameItem col2 row4 sq4" type="number"/>
                     <GameItem className="px-0 text-center gameItem col3 row4 sq4" type="number"/>
@@ -246,7 +271,7 @@ const GameField = () => {
                     <GameItem className="px-0 text-center gameItem col3 row6 sq4" type="number"/>
             </GameSquar>
 
-            <GameSquar className="container d-flex flex-wrap align-items-center px-0 mx-0 squar5" bgColor>
+            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar5" bgColor>
                     <GameItem className="px-0 text-center gameItem col4 row4 sq5" type="number"/>
                     <GameItem className="px-0 text-center gameItem col5 row4 sq5" type="number"/>
                     <GameItem className="px-0 text-center gameItem col6 row4 sq5" type="number"/>
@@ -258,7 +283,7 @@ const GameField = () => {
                     <GameItem className="px-0 text-center gameItem col6 row6 sq5" type="number"/>
             </GameSquar>
 
-            <GameSquar className="container d-flex flex-wrap align-items-center px-0 mx-0 squar6">
+            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar6">
                     <GameItem className="px-0 text-center gameItem col7 row4 sq6" type="number"/>
                     <GameItem className="px-0 text-center gameItem col8 row4 sq6" type="number"/>
                     <GameItem className="px-0 text-center gameItem col9 row4 sq6" type="number"/>
@@ -271,8 +296,8 @@ const GameField = () => {
             </GameSquar>
         </div>
 
-        <div className="container d-flex justify-content-center">
-            <GameSquar className="container d-flex flex-wrap align-items-center px-0 mx-0 squar7" bgColor>
+        <div className="container d-flex justify-content-center w-100 px-0 py-0">
+            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar7" bgColor>
                     <GameItem className="px-0 text-center gameItem col1 row7 sq7" type="number"/>
                     <GameItem className="px-0 text-center gameItem col2 row7 sq7" type="number"/>
                     <GameItem className="px-0 text-center gameItem col3 row7 sq7" type="number"/>
@@ -284,7 +309,7 @@ const GameField = () => {
                     <GameItem className="px-0 text-center gameItem col3 row9 sq7" type="number"/>
             </GameSquar>
 
-            <GameSquar className="container d-flex flex-wrap align-items-center px-0 mx-0 squar8">
+            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar8">
                     <GameItem className="px-0 text-center gameItem col4 row7 sq8" type="number"/>
                     <GameItem className="px-0 text-center gameItem col5 row7 sq8" type="number"/>
                     <GameItem className="px-0 text-center gameItem col6 row7 sq8" type="number"/>
@@ -296,7 +321,7 @@ const GameField = () => {
                     <GameItem className="px-0 text-center gameItem col6 row9 sq8" type="number"/>
             </GameSquar>
 
-            <GameSquar className="container d-flex flex-wrap align-items-center px-0 mx-0 squar9" bgColor>
+            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar9" bgColor>
                     <GameItem className="px-0 text-center gameItem col7 row7 sq9" type="number"/>
                     <GameItem className="px-0 text-center gameItem col8 row7 sq9" type="number"/>
                     <GameItem className="px-0 text-center gameItem col9 row7 sq9" type="number"/>
