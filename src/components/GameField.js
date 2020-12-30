@@ -192,8 +192,6 @@ const GameField = ({chooseLevel}) => {
              gameFields.push({position:index + 1, value:ele.value, note:["",""]});
              ele.setAttribute("id",index + 1);
          })
-
-
          hideSomeFileds();
          setIsReady(true);
     }
