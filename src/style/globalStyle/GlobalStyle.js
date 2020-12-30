@@ -19,8 +19,17 @@ const GlobalStyle = createGlobalStyle`
     background-repeat:no-repeat;
   }
 
+  .app{
+    display:flex;
+    flex-direction:center;
+    align-items:center;
+    width:100%;
+    min-height:100vh;
+  }
+
   .startScreenOff{
     opacity:0 !important;
+    display:none !important;
   }
 
   /* Chrome, Safari, Edge, Opera */

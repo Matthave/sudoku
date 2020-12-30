@@ -1,14 +1,25 @@
+/* eslint-disable no-loop-func */
 import React, {useEffect, useState} from 'react';
+import GameRow from "./GameRow";
+import Note from "./Note";
 import styled from "styled-components";
 import { device } from "../style/mediaQuery/mediaQuery";
 
-const Game = styled.div`
-position: fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
+const GameWrapper = styled.div`
+width:100%;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
 opacity: ${(props) => (props.visibility ? 1 : 0)};
-transition: opacity 1s linear;
+transition: 1s linear;
+
+@media ${device.large} {
+    flex-direction:row;
+  }
+`;
+
+const Game = styled.div`
 width:300px;
 min-width:300px;
 
@@ -19,47 +30,6 @@ min-width:300px;
 @media ${device.small} {
     width:555px;
 }
-`;
-
-const GameSquar = styled.div`
-width:100px;
-height:100px;
-
-@media ${device.xsmall} {
-    width:120px;
-    height:120px;
-  }
-
-  @media ${device.small} {
-    width:180px;
-    height:180px;
-  } 
-`;
-
-const GameItem = styled.input`
-width:32px;
-height:32px;
-cursor: pointer;
-caret-color:transparent;
-font-weight:100;
-color:#344861;
-margin:0;
-
-&:hover{
-    background-color:#BBDEFB !important;
-}
-@media ${device.xsmall} {
-    height:38.5px;
-    width:38.5px;
-    font-size:22.5px;
-  }
-
-  @media ${device.small} {
-    width:58.5px;
-    height:58.5px;
-    line-height:60px;
-    font-size:40px;
-  } 
 `;
 
 const Loading = styled.p`
@@ -73,6 +43,9 @@ const Loading = styled.p`
 
 const GameField = ({chooseLevel}) => {
     const [isReady, setIsReady] = useState(false);
+    const [gameItemIsSelect, setGameItemIsSelect] = useState(false);
+    const [currentGameItemSelected, setCurrentGameItemSelected] = useState("");
+    let [gameFields, setGameFields] = useState([]);
 
     useEffect(() => {
         initialFunction();
@@ -107,16 +80,19 @@ const GameField = ({chooseLevel}) => {
         const colItems = [...document.querySelectorAll(`.${targetCol}`)];
         const isColReject = colItems.filter((ele)=>{
             if(ele.value === e.target.value && ele.value !== "") return true;
+            else return false;
         });
 
         const rowItems = [...document.querySelectorAll(`.${targetRow}`)];
         const isRowReject = rowItems.filter((ele)=>{
             if(ele.value === e.target.value && ele.value !== "") return true;
+            else return false;
         });
 
         const squareItems = [...document.querySelectorAll(`.${targetSquare}`)];
         const isSquareReject = squareItems.filter((ele)=>{
             if(ele.value === e.target.value && ele.value !== "") return true;
+            else return false;
         });
         
         if(isColReject.length > 1 || isRowReject.length > 1 || isSquareReject.length > 1){
@@ -155,7 +131,20 @@ const GameField = ({chooseLevel}) => {
             })
         }
 
-        e.target.style.backgroundColor = "#BBDEFB"
+        e.target.style.backgroundColor = "#BBDEFB";
+        setGameItemIsSelect(true);
+
+        //Get note, and upload data from current clicked/marked filed
+        const idOfClickedElement = e.target.id;
+        const matchedGameFiled = gameFields[idOfClickedElement -1];
+
+        const noteFirstInput = document.querySelector(".note__firstInput");
+        const noteSecondInput = document.querySelector(".note__secondInput");
+
+        setCurrentGameItemSelected(idOfClickedElement);
+        noteFirstInput.value = matchedGameFiled.note[0];
+        noteSecondInput.value = matchedGameFiled.note[1];
+
     }
 
 
@@ -196,6 +185,15 @@ const GameField = ({chooseLevel}) => {
                 }
             }
          }
+         
+         //Save every fields value and note value
+         const getEveryField = [...document.querySelectorAll(".gameItem")];
+         getEveryField.forEach((ele,index)=>{
+             gameFields.push({position:index + 1, value:ele.value, note:["",""]});
+             ele.setAttribute("id",index + 1);
+         })
+
+
          hideSomeFileds();
          setIsReady(true);
     }
@@ -219,121 +217,12 @@ const GameField = ({chooseLevel}) => {
     return (
         <>
         {isReady ? null : <Loading>LOADING...</Loading> }
-        <Game className="container col-12 d-flex flex-column justify-content-center px-0 py-0 gameField" visibility={isReady ? "true" : ""}>
-        <div className="container d-flex justify-content-center w-100 px-0 py-0">
-            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar1" bgColor>
-                    <GameItem className="px-0 text-center gameItem col1 row1 sq1" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col2 row1 sq1" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col3 row1 sq1" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col1 row2 sq1" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col2 row2 sq1" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col3 row2 sq1" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col1 row3 sq1" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col2 row3 sq1" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col3 row3 sq1" type="number"/>
-            </GameSquar>
-
-            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar2">
-                    <GameItem className="px-0 text-center gameItem col4 row1 sq2" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col5 row1 sq2" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col6 row1 sq2" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col4 row2 sq2" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col5 row2 sq2" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col6 row2 sq2" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col4 row3 sq2" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col5 row3 sq2" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col6 row3 sq2" type="number"/>
-            </GameSquar>
-
-            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar3" bgColor>
-                    <GameItem className="px-0 text-center gameItem col7 row1 sq3" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col8 row1 sq3" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col9 row1 sq3" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col7 row2 sq3" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col8 row2 sq3" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col9 row2 sq3" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col7 row3 sq3" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col8 row3 sq3" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col9 row3 sq3" type="number"/>
-            </GameSquar>
-        </div>
-
-        <div className="container d-flex justify-content-center w-100 px-0 py-0">
-            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar4">
-                    <GameItem className="px-0 text-center gameItem col1 row4 sq4" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col2 row4 sq4" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col3 row4 sq4" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col1 row5 sq4" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col2 row5 sq4" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col3 row5 sq4" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col1 row6 sq4" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col2 row6 sq4" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col3 row6 sq4" type="number"/>
-            </GameSquar>
-
-            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar5" bgColor>
-                    <GameItem className="px-0 text-center gameItem col4 row4 sq5" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col5 row4 sq5" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col6 row4 sq5" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col4 row5 sq5" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col5 row5 sq5" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col6 row5 sq5" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col4 row6 sq5" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col5 row6 sq5" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col6 row6 sq5" type="number"/>
-            </GameSquar>
-
-            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar6">
-                    <GameItem className="px-0 text-center gameItem col7 row4 sq6" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col8 row4 sq6" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col9 row4 sq6" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col7 row5 sq6" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col8 row5 sq6" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col9 row5 sq6" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col7 row6 sq6" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col8 row6 sq6" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col9 row6 sq6" type="number"/>
-            </GameSquar>
-        </div>
-
-        <div className="container d-flex justify-content-center w-100 px-0 py-0">
-            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar7" bgColor>
-                    <GameItem className="px-0 text-center gameItem col1 row7 sq7" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col2 row7 sq7" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col3 row7 sq7" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col1 row8 sq7" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col2 row8 sq7" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col3 row8 sq7" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col1 row9 sq7" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col2 row9 sq7" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col3 row9 sq7" type="number"/>
-            </GameSquar>
-
-            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar8">
-                    <GameItem className="px-0 text-center gameItem col4 row7 sq8" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col5 row7 sq8" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col6 row7 sq8" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col4 row8 sq8" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col5 row8 sq8" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col6 row8 sq8" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col4 row9 sq8" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col5 row9 sq8" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col6 row9 sq8" type="number"/>
-            </GameSquar>
-
-            <GameSquar className="container d-flex flex-wrap align-items-center justify-content-center px-0 mx-0 squar9" bgColor>
-                    <GameItem className="px-0 text-center gameItem col7 row7 sq9" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col8 row7 sq9" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col9 row7 sq9" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col7 row8 sq9" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col8 row8 sq9" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col9 row8 sq9" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col7 row9 sq9" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col8 row9 sq9" type="number"/>
-                    <GameItem className="px-0 text-center gameItem col9 row9 sq9" type="number"/>
-            </GameSquar>
-        </div>
+        <GameWrapper className="gameWrapper" visibility={isReady ? "true" : ""}>
+        <Game className="container d-flex flex-column justify-content-center align-items-center px-0 py-0 mx-0 gameField">
+            <GameRow/>
         </Game>
+        <Note gameItemIsSelect={gameItemIsSelect} currentGameItemSelected={currentGameItemSelected} gameFields={gameFields}/>
+        </GameWrapper>
         </>
     )
 }
